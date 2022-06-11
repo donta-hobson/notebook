@@ -11,6 +11,8 @@ const credentials = {
   };
 const client = new Client(credentials);
 
+const tableHeaders = 'id int PRIMARY KEY, message char, title char, tags text [], links text [],created timetz'
+
 // Connect to the database
 async function clientDemo() {
     await client.connect();
@@ -24,7 +26,25 @@ async function clientDemo() {
 }
 //   Select Notebook
 //  selection : is the selectors want to query the table.
-//   notebook: is the table you want to qurery.
+//   notebook: is the table you want to qurery. expects an array [id, message,title,tags:array,links:array,created]
+async function createNotebook(tableName,values =Array){
+    clientDemo()
+    const x = ''
+    values.map((i,n)=>{
+        if(n >0){
+            x = x + ","+i
+        }
+        else{
+            x = x+i
+
+        }
+        
+    })
+    const now = await client.query(`CREATE TABLE ${tableName} (${tableHeaders}) VALUES (${x})`)
+    return now
+}
+
+
 async function selectNotebook(selection,notebook) {
     clientDemo()
     const now = await client.query(`SELECT ${selection}  FROM ${notebook}`);
@@ -32,15 +52,18 @@ async function selectNotebook(selection,notebook) {
 
 }
 //  Insert into notebook
-async function insertIntoNotebook(){
-    const now = await client.query("INSERT INTO notebooks (id,message) VALUES (1,'hello every one im rick')")
+async function createCard(values,notebook){
+    clientDemo()
+    
+
+    const now = await client.query(`INSERT INTO ${notebook} (${tableHeaders}) VALUES (${values})`)
     return now
 }
 
 
 router.get("/",async (req,res)=>{
     // insertIntoNotebook()
-    const x = selectNotebook()
+    const x = selectNotebook("id,message",'notebooks')
     x.then(res=>{
         console.log(res.rows)
     })
