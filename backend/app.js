@@ -1,35 +1,31 @@
 require("dotenv/config")
 const { Client } = require('pg');
 const express = require('express')
+const cors = require('cors')
+var bodyParser = require('body-parser');
+const notesRoute = require('./routes/notes')
+const notebookRoute = require('./routes/notebooks')
 
 // Create express app 
 const app = express()
 
 const port = 3000
-// postgress credentials from ENV
-const credentials = {
-    user: process.env.USER,
-    host: process.env.HOST,
-    database: process.env.DATABASE,
-    password: process.env.PASSWORD,
-    port: process.env.PG_PORT,
-  };
-// Connect to the database
-  async function clientDemo() {
-    const client = new Client(credentials);
-    await client.connect();
-    const now = await client.query("SELECT NOW()");
-    if(now){
-      console.log('Database connected')
-    }
-    await client.end();
-  
-    return now;
-  }
 
-// Initialize aoo
+// Middleware
+app.use(cors())
+app.use(bodyParser.json());
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+
+
+//  Routes
+app.get("/",(req,res)=>{
+  res.send('hello world')
+})
+app.use("/notes",notesRoute)
+app.use("/notebook",notebookRoute)
+
+
 app.listen(port,()=>{
-  clientDemo()
-
     console.log('Now listening on: ' + port )
 })
