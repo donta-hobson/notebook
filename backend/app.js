@@ -19,11 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 
 
 //  Routes
-app.get("/",(req,res)=>{
-  res.send('hello world')
-})
-app.use("/notes",notesRoute)
-app.use("/notebook",notebookRoute)
+
+app.use("/",notebookRoute)
 
 
 app.listen(port,()=>{

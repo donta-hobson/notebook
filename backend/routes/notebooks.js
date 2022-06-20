@@ -2,6 +2,10 @@ const express = require('express');
 const cli = require('nodemon/lib/cli');
 const router = express.Router()
 const { Client } = require('pg');
+
+
+/* 🍄 🍄 🍄 🍄🍄   Constants  🍄 🍄 🍄 🍄 🍄 🍄 🍄  */ 
+
 const credentials = {
     user: process.env.USER,
     host: process.env.HOST,
@@ -12,6 +16,8 @@ const credentials = {
 const client = new Client(credentials);
 
 const tableHeaders = 'id int PRIMARY KEY, message char, title char, tags text [], links text [],created timetz'
+
+/*---------------------------------------------------------------------- */
 
 // Connect to the database
 async function clientDemo() {
@@ -24,52 +30,114 @@ async function clientDemo() {
   
     return now;
 }
-//   Select Notebook
-//  selection : is the selectors want to query the table.
-//   notebook: is the table you want to qurery. expects an array [id, message,title,tags:array,links:array,created]
-async function createNotebook(tableName,values =Array){
-    clientDemo()
-    const x = ''
-    values.map((i,n)=>{
-        if(n >0){
-            x = x + ","+i
-        }
-        else{
-            x = x+i
+clientDemo()
+.then(res=>{
+    console.log('database conected')
+})
+.catch(err=>{
+    console.log(err.message)
+})
 
-        }
-        
-    })
-    const now = await client.query(`CREATE TABLE ${tableName} (${tableHeaders}) VALUES (${x})`)
+
+/*-----------   NoteBook functions       ---------- */
+
+// Create Notebook function
+async function createNotebook(tableName){
+    
+    const now = await client.query(`CREATE TABLE ${tableName} (
+        id varchar,
+        message varchar,
+        title varchar,
+        tags varchar [ ],
+        created timestamptz
+    )`)
+    return now
+}
+// Get all notebooks(tables)
+async function getNotebooks(notebooks){
+    const now =await client.query(`SELECT ${notebooks} FROM information_schema.tables WHERE table_schema='public'`)
+    return now
+
+}
+
+// Delete Notebook
+async function deleteNotebook(notebook){
+    const now = client.query(`DROP TABLE ${notebook}`)
     return now
 }
 
+// Rename Notebook 
+async function renameNotebook(notebook,title){
+    const now = client.query(`ALTER TABLE ${notebook} RENAME TO ${title}`)
+    return now
+}
 
-async function selectNotebook(selection,notebook) {
-    clientDemo()
+/*-----------   Notecard functions       ---------- */
+
+/*   Select Notecard from notebook */
+async function selectCard(selection,notebook) {
     const now = await client.query(`SELECT ${selection}  FROM ${notebook}`);
     return now;
 
 }
-//  Insert into notebook
-async function createCard(values,notebook){
-    clientDemo()
-    
 
-    const now = await client.query(`INSERT INTO ${notebook} (${tableHeaders}) VALUES (${values})`)
+// Create a notecard
+async function createCard(values,notebook){
+    const now = await client.query(`INSERT INTO ${notebook} VALUES (${values})`)
     return now
 }
 
+// Update notecard 
+async function updateNoteCard(values,notebook,id){
+    const now = await client.query(`UPDATE ${notebook} SET ${values} WHERE ${id}` )
+    return now
 
-router.get("/",async (req,res)=>{
-    // insertIntoNotebook()
-    const x = selectNotebook("id,message",'notebooks')
-    x.then(res=>{
-        console.log(res.rows)
-    })
-    
-    res.send('connected')
+}
 
+// DELETE NOTECARD
+async function deleteNoteCard(notebook,id){
+    const now = await client.query(`DELETE FROM ${notebook} WHERE ${id}` )
+    return now
+
+}
+
+
+
+/*** ********  Routes  ************ */ 
+// Get all notebooks route
+router.get("/notebook",async (req,res)=>{
+    const getAll = await getNotebooks()
     
+    res.send(getAll.rows)
 })
+
+/****** Create Notebook Route   ******/ 
+router.post("/notebook",(req,res)=>{
+    const par = req.body.tableName
+    createNotebook(par)
+    .then(data=>{
+        res.status(200).send({success:true})
+
+    })
+    .catch(err=>{
+        res.status(400).send(err.message)
+    })
+})
+
+
+/********   Create Notecard       ******* */
+router.post('/notecard',(req,res)=>{
+    const data = req.body.data
+    createCard(data,req.body.tableName)
+    .then(fin=>{
+        res.status(200).send({sucess:true,data:fin})
+    })
+    .catch(err=>{
+        res.status(400).send(err.message)
+    })
+
+})
+
+
+
 module.exports= router
