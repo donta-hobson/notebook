@@ -1,142 +1,68 @@
 const express = require('express');
 const cli = require('nodemon/lib/cli');
 const router = express.Router()
-const { Client } = require('pg');
-
-
-/* 🍄 🍄 🍄 🍄🍄   Constants  🍄 🍄 🍄 🍄 🍄 🍄 🍄  */ 
-
-const credentials = {
-    user: process.env.USER,
-    host: process.env.HOST,
-    database: process.env.DATABASE,
-    password: process.env.PASSWORD,
-    port: process.env.PG_PORT,
-  };
-const client = new Client(credentials);
-
-const tableHeaders = 'id int PRIMARY KEY, message char, title char, tags text [], links text [],created timetz'
-
-/*---------------------------------------------------------------------- */
-
-// Connect to the database
-async function clientDemo() {
-    await client.connect();
-    const now = await client.query("SELECT NOW()");
-    if(now){
-      console.log('Database connected')
-    }
-    await client.end();
-  
-    return now;
-}
-clientDemo()
-.then(res=>{
-    console.log('database conected')
-})
-.catch(err=>{
-    console.log(err.message)
-})
-
-
-/*-----------   NoteBook functions       ---------- */
-
-// Create Notebook function
-async function createNotebook(tableName){
-    
-    const now = await client.query(`CREATE TABLE ${tableName} (
-        id varchar,
-        message varchar,
-        title varchar,
-        tags varchar [ ],
-        created timestamptz
-    )`)
-    return now
-}
-// Get all notebooks(tables)
-async function getNotebooks(notebooks){
-    const now =await client.query(`SELECT ${notebooks} FROM information_schema.tables WHERE table_schema='public'`)
-    return now
-
-}
-
-// Delete Notebook
-async function deleteNotebook(notebook){
-    const now = client.query(`DROP TABLE ${notebook}`)
-    return now
-}
-
-// Rename Notebook 
-async function renameNotebook(notebook,title){
-    const now = client.query(`ALTER TABLE ${notebook} RENAME TO ${title}`)
-    return now
-}
-
-/*-----------   Notecard functions       ---------- */
-
-/*   Select Notecard from notebook */
-async function selectCard(selection,notebook) {
-    const now = await client.query(`SELECT ${selection}  FROM ${notebook}`);
-    return now;
-
-}
-
-// Create a notecard
-async function createCard(values,notebook){
-    const now = await client.query(`INSERT INTO ${notebook} VALUES (${values})`)
-    return now
-}
-
-// Update notecard 
-async function updateNoteCard(values,notebook,id){
-    const now = await client.query(`UPDATE ${notebook} SET ${values} WHERE ${id}` )
-    return now
-
-}
-
-// DELETE NOTECARD
-async function deleteNoteCard(notebook,id){
-    const now = await client.query(`DELETE FROM ${notebook} WHERE ${id}` )
-    return now
-
-}
+const noteFunc = require('./notebookFunctions')
+const {
+    getNotebooks,
+    selectCard,
+    createNotebook,
+    createCard
+} = require("./notebookFunctions")
 
 
 
 /*** ********  Routes  ************ */ 
-// Get all notebooks route
+// Get NOTEBOOK TITLES route
 router.get("/notebook",async (req,res)=>{
-    const getAll = await getNotebooks()
+    const q = req.params.query
+    const getAll = await getNotebooks(q)
     
     res.send(getAll.rows)
 })
 
-/****** Create Notebook Route   ******/ 
-router.post("/notebook",(req,res)=>{
-    const par = req.body.tableName
-    createNotebook(par)
+// Create Notebook
+router.post('/notebook',(req,res)=>{
+    let name = req.body.tableName
+    if (!name){
+        res.status(400).send('must have a tablename')
+    }
+    else{
+    createNotebook(name)
     .then(data=>{
-        res.status(200).send({success:true})
-
+        res.send(data)
     })
     .catch(err=>{
         res.status(400).send(err.message)
     })
+}
+
+
 })
 
+// SELECT CARD FROM TABLE
+router.get('/notecard',async (req,res)=>{
+    const data = req.query
+    const now = await selectCard(data.selection,data.notebook,data.where)
+    res.send(now.rows)
 
-/********   Create Notecard       ******* */
+})
+
+// Create Notecard
 router.post('/notecard',(req,res)=>{
-    const data = req.body.data
-    createCard(data,req.body.tableName)
-    .then(fin=>{
-        res.status(200).send({sucess:true,data:fin})
+    // id,message,title,[tags]
+
+    let values = req.body.values
+    let notebook = req.body.notebook
+    createCard(values,notebook)
+    .then(suc=>{
+        res.status(200).send({success:true})
     })
     .catch(err=>{
-        res.status(400).send(err.message)
+        res.status(400).send({success:false,error:err.message})
     })
 
 })
+
 
 
 
