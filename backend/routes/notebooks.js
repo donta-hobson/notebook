@@ -9,7 +9,8 @@ const {
     createCard,
     deleteNotebook,
     renameNotebook,
-    updateNoteCard
+    updateNoteCard,
+    deleteNoteCard
 } = require("./notebookFunctions")
 
 
@@ -71,6 +72,9 @@ renameNotebook(body.notebook,body.title)
 })
 })
 
+
+
+
 // SELECT CARD FROM TABLE
 router.get('/notecard',async (req,res)=>{
     const data = req.query
@@ -108,6 +112,18 @@ router.put('/notecard',(req,res)=>{
     })
     .catch(err=>{
         res.status(400).send({error:err.message})
+    })
+
+})
+// Delete Notecard
+router.delete('/notecard',(req,res)=>{
+    const body = req.body
+    deleteNoteCard(body.notebook,body.id)
+    .then(succ=>{
+        res.send({success:true,data:succ.rows})
+    })
+    .catch(err=>{
+        res.status(400).send({success:false,error:err.message})
     })
 
 })

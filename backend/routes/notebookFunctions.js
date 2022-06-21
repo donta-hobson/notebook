@@ -96,7 +96,7 @@ async function updateNoteCard(values,notebook,id){
 
 // DELETE NOTECARD
 async function deleteNoteCard(notebook,id){
-    const now = await client.query(`DELETE FROM ${notebook} WHERE ${id}` )
+    const now = await client.query(`DELETE FROM ${notebook} WHERE id =  ${id}` )
     return now
 
 }
