@@ -81,13 +81,15 @@ async function selectCard(selection,notebook,where) {
 // Create a notecard
 async function createCard(values,notebook){
     // id,message,title,[tags]
-    const now = await client.query(`INSERT INTO ${notebook} VALUES (${values})`)
+    let v = values
+    v+= `,CURRENT_TIMESTAMP`
+    const now = await client.query(`INSERT INTO ${notebook} VALUES (${v})`)
     return now
 }
 
 // Update notecard 
 async function updateNoteCard(values,notebook,id){
-    const now = await client.query(`UPDATE ${notebook} SET ${values} WHERE ${id}` )
+    const now = await client.query(`UPDATE ${notebook} SET ${values} WHERE id = ${id}` )
     return now
 
 }
