@@ -1,5 +1,4 @@
 const express = require('express');
-const cli = require('nodemon/lib/cli');
 const router = express.Router()
 const noteFunc = require('./notebookFunctions')
 const {
@@ -72,7 +71,7 @@ renameNotebook(body.notebook,body.title)
 })
 })
 
-
+/*___________________________________________ */
 
 
 // SELECT CARD FROM TABLE
@@ -87,7 +86,6 @@ router.get('/notecard',async (req,res)=>{
     })
 
 })
-
 // Create Notecard
 router.post('/notecard',(req,res)=>{
     // id,message,title,[tags]
