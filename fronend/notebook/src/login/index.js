@@ -81,6 +81,9 @@ justify-content:center;
     @media (min-width: 992px) {
         display: flex;
     }
+    @media (min-width: 1200px) { 
+        justify-content: center;
+    }
     
 
 
@@ -132,6 +135,9 @@ justify-content:center;
     @media (min-width: 992px) {
         font-size: 2rem;
         height:5rem;
+    }
+    @media (min-width: 1200px) { 
+        width:28%
     }
 
 }
