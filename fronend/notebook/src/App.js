@@ -1,16 +1,22 @@
 import './App.css';
 import styled from "styled-components"
+import {Route,Routes,Navigate} from 'react-router-dom'
+import Login from './login/index'
+import Notebook from './notebook/index'
 
-const MainComponent = styled.div`
-  background:black;
-  height:100vh;
-  
-`
+ 
 function App() {
   return (
-    <MainComponent className="App">
+    <div id='app'>
+      <Routes>
+        <Route index path="/" element={<Login/>}/>
+
+        {/* <Route  path="/" element={<Notebook/>}/> */}
+      </Routes>
+
+    </div>
+   
   
-    </MainComponent>
   );
 }
 
