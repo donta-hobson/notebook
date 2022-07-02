@@ -96,8 +96,13 @@ flex-direction: column;
 
 `
 function Books (props){
+    // States
     const [DropShow,setDropShow] = useState(false)
     const ref = useRef()
+
+    /*------------------------------- */
+
+    // Functions
     const handleClickOutside = (e) => {
         if (ref.current && ref.current.contains(e.target)) {
           // inside click
@@ -105,18 +110,25 @@ function Books (props){
         }
         setDropShow(false)
       };
+    /*------------------------------- */
+
+
       document.addEventListener('click',handleClickOutside)
 
-    // handleClickOutside()
 
     return <Box ref={ref}>
         <h3 className='notebookTitle'>{props.title}</h3>
+        
         <span className="titleDivider"></span>
+
         <div className='textPrev'>
 
         </div>
+        
+        
         <div id='boxMenuCont'>
-        <div>
+
+        <div className='notebookMenuCont'>
         <Dots className='dots' onClick={()=>setDropShow(!DropShow)}/>
         {
             DropShow ? <DropMenu notebook={props.title} close={setDropShow}/> : null
@@ -125,6 +137,8 @@ function Books (props){
 
 
         </div>
+
+        
     </Box>
 }
 
