@@ -1,5 +1,8 @@
 import styled from 'styled-components'
 import {ReactComponent as Dots} from './dots.svg'
+import DropMenu from './DropMenu'
+import { useState,useRef } from 'react'
+import { useEffect } from 'react'
 const Box = styled.div`
 width: 40%;
 border:solid black .1rem;
@@ -93,14 +96,32 @@ flex-direction: column;
 
 `
 function Books (props){
-    return <Box>
+    const [DropShow,setDropShow] = useState(false)
+    const ref = useRef()
+    const handleClickOutside = (e) => {
+        if (ref.current && ref.current.contains(e.target)) {
+          // inside click
+          return;
+        }
+        setDropShow(false)
+      };
+      document.addEventListener('click',handleClickOutside)
+
+    // handleClickOutside()
+
+    return <Box ref={ref}>
         <h3 className='notebookTitle'>{props.title}</h3>
         <span className="titleDivider"></span>
         <div className='textPrev'>
 
         </div>
         <div id='boxMenuCont'>
-        <Dots className='dots'/>
+        <div>
+        <Dots className='dots' onClick={()=>setDropShow(!DropShow)}/>
+        {
+            DropShow ? <DropMenu notebook={props.title} close={setDropShow}/> : null
+        }
+        </div>
 
 
         </div>
